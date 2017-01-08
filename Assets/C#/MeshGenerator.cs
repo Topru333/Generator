@@ -35,19 +35,21 @@ public static class MeshGenerator {
         return meshData;
     }
 
+    
 }
 
 public class MeshData {
     public Vector3[] vertices; //Массив из вершин
-    public int[] triangles; //Массив из треугольников (каждые три элемента 1 треугольник)
+    public int[]     triangles; //Массив из треугольников (каждые три элемента 1 треугольник)
+    public Vector3[] normals=null;
     public Vector2[] uvs;
 
-    int triangleIndex;
+    int triangleIndex=0;
 
     public MeshData (int meshWidth, int meshHeight) {
-        vertices = new Vector3[meshWidth * meshHeight]; //Координаты вершин
-        uvs = new Vector2[meshWidth * meshHeight];
-        triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6]; //Кол во вершин для треугольников
+        vertices    = new Vector3[meshWidth * meshHeight]; //Координаты вершин
+        uvs         = new Vector2[meshWidth * meshHeight];
+        triangles   = new int[(meshWidth - 1) * (meshHeight - 1) * 6]; //Кол во вершин для треугольников
     }
 
     /// <summary>
@@ -64,11 +66,16 @@ public class MeshData {
     }
 
     public Mesh CreateMesh () {
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = uvs;
-        mesh.RecalculateNormals();
+        Mesh mesh = new Mesh()
+        {
+            vertices    = vertices,
+            triangles   = triangles,
+            uv = uvs
+        };
+        //if (normals != null)
+        //    mesh.normals = normals;
+        //else
+            mesh.RecalculateNormals();
         return mesh;
     }
 

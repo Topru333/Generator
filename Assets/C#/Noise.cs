@@ -1,11 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+[Serializable]
+public struct NoiseParameters
+{
+    public int mapSize, seed, octaves;
+    public float scale, persistance, lacunarity;
+}
 
 public static class Noise
 {
     /// <summary>
-    /// Функция распределения
+    /// Функция генерирующая массив с коэффициентами шума перлина. 
     /// </summary>
     /// <param name="mapWidth"> широта </param>
     /// <param name="mapHeight"> высота </param>
@@ -16,20 +23,20 @@ public static class Noise
     /// <param name="lacunarity"> мера неоднородности </param>
     /// <param name="offset"> смещение </param>
     /// <returns></returns>
-    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
+    public static float[,] GenerateNoiseMap(NoiseParameters p)
     {
-        if (mapHeight <= 0) mapHeight = 1;
-        if (mapWidth <= 0) mapWidth = 1;
-        if (scale <= 0.209) scale = 0.21f;
+        if (p.mapSize <= 0) p.mapSize = 1;
+        if (p.scale <= 0.209) p.scale = 0.21f;
 
-        float[,] noiseMap = new float[mapWidth, mapHeight];
+        // Инициализируем массив значений.
+        float[,] noiseMap = new float[p.mapSize, p.mapSize];
 
-        System.Random prng = new System.Random(seed);
-        Vector2[] octaveOffsets = new Vector2[octaves];
+        System.Random prng = new System.Random(p.seed);
+        Vector2[] octaveOffsets = new Vector2[p.octaves];
         //Псевдо рандом генерации
-        for (int i = 0; i < octaves; i++) {
-            float offsetX = prng.Next(-10000, 10000) + offset.x;
-            float offsetY = prng.Next(-10000, 10000) + offset.y;
+        for (int i = 0; i < p.octaves; i++) {
+            float offsetX = prng.Next(-10000, 10000);
+            float offsetY = prng.Next(-10000, 10000);
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
         }
 
@@ -37,37 +44,58 @@ public static class Noise
         float minNoiseHeight = float.MaxValue;
 
         // Середина для центрального приблежения
-        float halfWidth = mapWidth / 2f;
-        float halfHeight = mapHeight / 2f;
+        float halfWidth = p.mapSize / 2f;
+        float halfHeight = p.mapSize / 2f;
 
         // Подсчет частоты
-        for (int y = 0; y < mapHeight; y++)
+        float amplitude, frequency, noiseHeight;
+        for (int y = 0; y < p.mapSize; y++)
         {
-            for (int x = 0; x < mapWidth; x++) {
+            for (int x = 0; x < p.mapSize; x++) {
+                amplitude = frequency = 1;
+                noiseHeight = 0;
 
-                float amplitude = 1;
-                float frequency = 1;
-                float noiseHight = 0;
-                for (int i = 0; i < octaves; i++) {
-                    float sampleX = (x - halfWidth) / scale * frequency + octaveOffsets[i].x;
-                    float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[i].y;
+                for (int i = 0; i < p.octaves; i++) {
+                    float sampleX = (x - halfWidth)     / p.scale * frequency + octaveOffsets[i].x;
+                    float sampleY = (y - halfHeight)    / p.scale * frequency + octaveOffsets[i].y;
 
                     float perLinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
-                    noiseHight += perLinValue * amplitude;
-                    amplitude *= persistance;
-                    frequency *= lacunarity;
+                    noiseHeight += perLinValue * amplitude;
+                    amplitude *= p.persistance;
+                    frequency *= p.lacunarity;
                 }
-                if (noiseHight > maxNoiseHeight) maxNoiseHeight = noiseHight;
-                else if (noiseHight < minNoiseHeight) minNoiseHeight = noiseHight;
+                if (noiseHeight > maxNoiseHeight) maxNoiseHeight = noiseHeight;
+                else if (noiseHeight < minNoiseHeight) minNoiseHeight = noiseHeight;
 
-                noiseMap[x, y] = noiseHight; 
+                noiseMap[x, y] = noiseHeight;
             }
         }
 
         // Нормализация от 0 до 1
-        for (int y = 0; y < mapHeight; y++) {
-            for (int x = 0; x < mapWidth; x++) {
+        for (int y = 0; y < p.mapSize; y++) {
+            for (int x = 0; x < p.mapSize; x++) {
                 noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+            }
+        }
+        // преобразование в сферические координаты
+        for (int j = 0; j < p.mapSize; j++)
+        {
+            float theta = Mathf.PI * (j - (p.mapSize - 1) / 2.0f) / (p.mapSize - 1);
+            for (int i = 0; i < p.mapSize; i++)
+            {
+                float phi = Mathf.PI*2 * (i - p.mapSize / 2.0f) / p.mapSize;
+                float phi2 = phi * Mathf.Cos(theta);
+                int i2 = (int)(phi2 * p.mapSize / (Mathf.PI * 2) + p.mapSize / 2);
+                float newpixel;
+                if (i2 < 0 || i2 > p.mapSize - 1)
+                {
+                    newpixel = 1;                         /* Should not happen */
+                }
+                else
+                {
+                    newpixel = noiseMap[j , i2];
+                }
+                noiseMap[j, i] = newpixel;
             }
         }
         return noiseMap;

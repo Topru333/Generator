@@ -1,18 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+// Режимы отрисовки
+public enum DrawMode { NoiseMap, ColourMap, Mesh }
 
 public class MapGenerator : MonoBehaviour {
-    public enum DrawMode { NoiseMap, ColourMap, Mesh }
+    // Режим отрисовки
     public DrawMode drawMode;
 
+    // Размер куска карты
     public const int mapChunkSize = 241;
+    
     [Range(0,6)]
-    public int levelOfDitail;
+    // Уровень детализации
+    public int levelOfDetail;
+
+    // Размер шума.
     public float noiseScale;
 
+    // Количество октав.
     public int octaves;
     [Range(0,1)]
+    // 
     public float persistance;
     public float lacunarity;
 
@@ -26,7 +35,16 @@ public class MapGenerator : MonoBehaviour {
     public TerrainType[] regions;
 
     public void GenerateMap() {
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
+        NoiseParameters np = new NoiseParameters()
+        {
+            mapSize = mapChunkSize,
+            seed = seed,
+            scale = noiseScale,
+            octaves = octaves,
+            persistance = persistance,
+            lacunarity = lacunarity
+        };
+        float[,] noiseMap = Noise.GenerateNoiseMap(np);
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
         for(int y = 0; y < mapChunkSize; y++) {
@@ -50,7 +68,7 @@ public class MapGenerator : MonoBehaviour {
                 display.DrawTexture(TextureGeneraitor.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
                 break;
             case DrawMode.Mesh:
-                display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap , meshHeightMultiplier, meshHeightCurve, levelOfDitail), TextureGeneraitor.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
+                display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap , meshHeightMultiplier, meshHeightCurve, levelOfDetail), TextureGeneraitor.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
                 break;
         }
     }
