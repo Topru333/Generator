@@ -25,5 +25,20 @@ public static class TextureGeneraitor  {
 
         return TextureFromColourMap(colourMap, width, height);
     }
+    public static Texture2D TextureFromHeightMap(float[][] heightMap)
+    {
+        int width = heightMap.GetLength(0);
+        int height = heightMap[0].GetLength(0);
 
+        Color[] colourMap = new Color[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                colourMap[y * width + x] = Color.Lerp(Color.black, Color.white, heightMap[x][y]);
+            }
+        }
+
+        return TextureFromColourMap(colourMap, width, height);
+    }
 }

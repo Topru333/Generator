@@ -1,0 +1,8 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(373,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  noise.cpp
+     Создается библиотека D:\UnityProject\Generator\Generator\Assets\CppDlls\ProceduralNoiseLib.lib и объект D:\UnityProject\Generator\Generator\Assets\CppDlls\ProceduralNoiseLib.exp
+  Создание кода
+  All 1 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  ProceduralNoiseLib.vcxproj -> D:\UnityProject\Generator\Generator\Assets\CppDlls\ProceduralNoiseLib.dll
+  ProceduralNoiseLib.vcxproj -> D:\UnityProject\Generator\Generator\Assets\CppDlls\ProceduralNoiseLib.pdb (Full PDB)

@@ -38,8 +38,8 @@ public class MeshTesting : MonoBehaviour {
             lacunarity = lacunarity
         };
         float[,] noiseMap = Noise.GenerateNoiseMap(np);
-        Sector s = new Sector(upVec, rightVec, noiseMap, 400,32);
-        GetComponent<MeshFilter>().mesh = s.GetMeshData();
+        //Sector s = new Sector(upVec, rightVec, noiseMap, 400,32);
+        //GetComponent<MeshFilter>().mesh = s.GetMeshData();
 	}
 	
 	// Update is called once per frame

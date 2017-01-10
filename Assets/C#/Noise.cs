@@ -6,7 +6,8 @@ using System;
 public struct NoiseParameters
 {
     public int mapSize, seed, octaves;
-    public float scale, persistance, lacunarity;
+    public float scale, persistance, lacunarity, heightScale;
+    public AnimationCurve heightCurve;
 }
 
 public static class Noise
@@ -70,35 +71,14 @@ public static class Noise
                 noiseMap[x, y] = noiseHeight;
             }
         }
-
         // Нормализация от 0 до 1
         for (int y = 0; y < p.mapSize; y++) {
             for (int x = 0; x < p.mapSize; x++) {
                 noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
         }
-        // преобразование в сферические координаты
-        for (int j = 0; j < p.mapSize; j++)
-        {
-            float theta = Mathf.PI * (j - (p.mapSize - 1) / 2.0f) / (p.mapSize - 1);
-            for (int i = 0; i < p.mapSize; i++)
-            {
-                float phi = Mathf.PI*2 * (i - p.mapSize / 2.0f) / p.mapSize;
-                float phi2 = phi * Mathf.Cos(theta);
-                int i2 = (int)(phi2 * p.mapSize / (Mathf.PI * 2) + p.mapSize / 2);
-                float newpixel;
-                if (i2 < 0 || i2 > p.mapSize - 1)
-                {
-                    newpixel = 1;                         /* Should not happen */
-                }
-                else
-                {
-                    newpixel = noiseMap[j , i2];
-                }
-                noiseMap[j, i] = newpixel;
-            }
-        }
         return noiseMap;
     }
+    
 
 }
